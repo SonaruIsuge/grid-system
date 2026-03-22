@@ -1,0 +1,26 @@
+.custom-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(68, 138, 255);
+}
+
+.custom-text-field Label {
+    min-width: 10px;
+}
+
+.m-label {
+    margin: 8px 5px 8px 5px;
+}
+
+.t-label {
+    -unity-font-style: bold;
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.custom-group-box {
+    margin: 0 3px 0 3px;
+    padding: 0;
+}

@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Scripts/Editor/GridInstantiate.uss?fileID=7433441132597879392&amp;guid=59b96ef98f8b30648933fa93475b6e60&amp;type=3#GridInstantiate" />
+    <ui:Label tabindex="-1" text="Grid Property" parse-escape-sequences="true" display-tooltip-when-elided="true" class="t-label m-label" />
+    <ui:FloatField label="Cell Size" name="cell-size" value="0.5" class="custom-text-field" style="align-items: center; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    <ui:GroupBox class="custom-group-box" style="flex-direction: row; flex-wrap: nowrap; justify-content: space-between; overflow: visible; align-items: stretch; align-self: center; width: 100%;">
+        <ui:UnsignedIntegerField label="Width" value="10" name="width" class="custom-text-field" style="justify-content: space-between; width: 45%; -unity-text-align: middle-left; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+        <ui:UnsignedIntegerField label="Height" value="10" name="height" class="small-label custom-text-field" style="justify-content: space-between; width: 45%; -unity-text-align: middle-left; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    </ui:GroupBox>
+    <ui:GroupBox class="custom-group-box" style="flex-direction: row; flex-wrap: nowrap; justify-content: space-between; overflow: visible; align-items: stretch; align-self: center; width: 100%;">
+        <ui:Vector3Field label="Offset Position" name="offset-position" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; flex-grow: 1;" />
+        <ui:Toggle label="Auto" name="auto-calculate-position-toggle" tooltip="Enable this to auto calculate offset position." class="custom-text-field" style="align-self: auto; -unity-text-align: middle-left; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    </ui:GroupBox>
+    <ui:Label tabindex="-1" text="Path Finding Property" parse-escape-sequences="true" display-tooltip-when-elided="true" class="m-label t-label" />
+    <uie:ObjectField label="Penalty Setting" type="TilePenaltySetting, Assembly-CSharp" name="penalty-setting" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    <ui:GroupBox class="custom-group-box" style="flex-direction: row; align-items: stretch; justify-content: space-around;">
+        <ui:Button text="Search Exist Setting" parse-escape-sequences="true" display-tooltip-when-elided="true" name="search-setting-btn" style="margin-top: 5px; margin-bottom: 5px; flex-grow: 0; width: 50%; padding-top: 1px; padding-right: 1px; padding-bottom: 1px; padding-left: 1px; margin-right: 5px; margin-left: 5px;" />
+        <ui:Button text="Create New Setting" parse-escape-sequences="true" display-tooltip-when-elided="true" name="create-setting-btn" style="margin-top: 5px; margin-bottom: 5px; flex-grow: 0; width: 50%; padding-top: 1px; padding-right: 1px; padding-bottom: 1px; padding-left: 1px; margin-right: 5px; margin-left: 5px;" />
+    </ui:GroupBox>
+    <ui:Toggle label="Create Debug" tooltip="Enable this to create a visual debug item." name="create-debug-toggle" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    <ui:Button text="Create Board" parse-escape-sequences="true" display-tooltip-when-elided="true" name="create-board-btn" style="-unity-font-style: bold; font-size: 14px; position: absolute; bottom: 5px; width: 98%; height: 21px;" />
+</ui:UXML>

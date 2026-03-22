@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecc45e8d05cb4e26b3877be1f90ebb39, type: 3}
+  m_Name: Wall_Entrance
+  m_EditorClassIdentifier: 
+  ID: 3
+  Name: Entrance
+  TiledPlaceable: {fileID: 5361320848131654205, guid: d059266b06ca2844dbd1f27c1aa29e91,
+    type: 3}
+  WorldSize: {x: 2, y: 0.5}
+  Walkable: 1
+  Category: 2
