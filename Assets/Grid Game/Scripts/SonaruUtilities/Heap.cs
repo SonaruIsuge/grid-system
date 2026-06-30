@@ -1,5 +1,16 @@
-﻿namespace SonaruUtilities
+﻿using UnityEngine.UIElements;
+
+namespace SonaruUtilities
 {
+    /// <summary>
+    /// An implementation of a fixed-size binary max-heap using an array as the underlying storage structure.
+    /// - The generic type T must implement IHeapItem<T> (including the HeapIndex property and the CompareTo method).
+    /// - Provides O(log n) operations for Add, RemoveFirst, and UpdateItem.
+    /// - The Contains method can determine whether an item exists in O(1) time (by comparing `item.HeapIndex` with the array index).
+    /// - The maximum capacity (`maxHeapSize`) must be specified during construction; the heap size is fixed and will not automatically expand or contract.
+    /// - Not thread-safe; manual synchronization is required when used in a multithreaded environment.
+    /// </summary>
+    
     public class Heap<T> where T : IHeapItem<T>
     {
         private T[] items;

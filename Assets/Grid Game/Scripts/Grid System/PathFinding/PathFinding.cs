@@ -58,10 +58,7 @@ namespace SNR_PathFinding
                 closeList.Add(currentTile);
 
                 if (currentTile == endTile)
-                {
-                    //sw.Stop();
-                    //Log.Info($"path find: {sw.ElapsedMilliseconds} ms");
-                    
+                {                    
                     pathFind = true;
                     break;
                 }

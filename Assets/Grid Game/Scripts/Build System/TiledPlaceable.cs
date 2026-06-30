@@ -5,8 +5,12 @@ namespace SNR_BuildSystem
 {
     public class TiledPlaceable : MonoBehaviour, IPlaceable
     {
-        public Transform Anchor => GetAnchor();
-        [field: SerializeField] public PlaceableData Data { get; private set; }
+        [SerializeField] private Transform anchor;
+        
+        [SerializeField] private PlaceableData placeableData;
+        
+        public Transform Anchor => anchor;
+        public PlaceableData Data => placeableData;
         public bool Placed { get; private set; }
 
         public float Width => Data.WorldSize.x;
