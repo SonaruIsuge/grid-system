@@ -1,34 +1,45 @@
 ﻿using System;
 using SNR_BuildSystem;
 using UnityEngine;
+using UtilSNR.Common;
 
-
-public class GameManager : MonoBehaviour
+public class GameManager : TSceneSingletonBehaviour<GameManager>
 {
+    private GameInputSystem gameInput;
+
+    public GameBoard GameBoard;
     public GridBuildManager GridBuildManager;
     public PreviewManager PreviewManager;
     public UIManager UIManager;
-    public GameInputSystem GameInputSystem;
-    public GameBoard GameBoard;
+
+    public GameInputSystem GameInput => gameInput;
 
 
-    private void Awake()
+    protected override void Awake()
     {
-        GameInputSystem.Init();
+        base.Awake();
+
+        gameInput = new();
     }
 
 
     private void OnEnable()
     {
-        GameInputSystem.RegisterInput();
+        gameInput.RegisterInput();
         UIManager.RegisterItemButtons(GridBuildManager.TiledItemList);
     }
 
 
     private void OnDisable()
     {
-        GameInputSystem.UnregisterInput();
+        gameInput.UnregisterInput();
         UIManager.UnregisterItemButtons();
+    }
+
+    private void Start()
+    {
+        // Set up managers
+        if (PreviewManager != null) PreviewManager.Setup(GameBoard.Grid, gameInput);
     }
 
 

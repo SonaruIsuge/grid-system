@@ -19,7 +19,7 @@ public class TestPlayer : MonoBehaviour
     
     private Camera MainCam => Camera.main;
     private Grid<PathFindableTile> Grid => gameManager.GameBoard.Grid;
-    private GameInputSystem Input => gameManager.GameInputSystem;
+    private GameInputSystem Input => gameManager.GameInput;
 
 
     private void Awake()

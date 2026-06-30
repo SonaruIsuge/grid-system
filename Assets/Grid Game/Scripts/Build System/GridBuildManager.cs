@@ -14,16 +14,19 @@ namespace SNR_BuildSystem
     
     public class GridBuildManager : MonoBehaviour
     {
-        [SerializeField] private GameManager gameManager;
         [SerializeField] private TiledItemList tiledItemList;
 
         public TiledItemList TiledItemList => tiledItemList;
         
-        private Grid<PathFindableTile> Grid => gameManager.GameBoard.Grid;
+        private GameBoard Board => GameManager.Instance != null ? GameManager.Instance.GameBoard : null;
+        private Grid<PathFindableTile> Grid => Board != null? Board.Grid : null;
 
 
         public void PlaceTiledItem(TiledPlaceable item, int xIndex, int yIndex)
         {
+            if (Board == null)
+                return;
+
             var itemCellSize = WorldSizeToCellSize(item.Width, item.Height);
             if(!CheckTilesPlaceable(xIndex, yIndex, itemCellSize.x, itemCellSize.y))
                 return;
@@ -38,11 +41,11 @@ namespace SNR_BuildSystem
                     var tileData = Grid.GetData(x, y);
                     tileData.SetPlaceable(false);
                     tileData.SetWalkable(item.Data.Walkable);
-                    tileData.SetPenalty(gameManager.GameBoard.GetPenalty(item.Data.Category));
+                    tileData.SetPenalty(Board.GetPenalty(item.Data.Category));
                 }
             }
 
-            item.Place(gameManager.GameBoard);
+            item.Place(Board);
         }
 
 

@@ -31,7 +31,7 @@ public class TestNPC : MonoBehaviour
 
     private void Awake()
     {
-        gameBoard = FindObjectOfType<GameBoard>();
+        gameBoard = GameManager.Instance.GameBoard;
     }
 
 

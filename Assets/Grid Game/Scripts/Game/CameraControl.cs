@@ -7,11 +7,11 @@ using UnityEngine.Serialization;
 public class CameraControl : MonoBehaviour
 {
     [SerializeField] private Camera mainCam;
-    [SerializeField] private GameInputSystem input;
     
     [SerializeField] private CameraControlAttr attr;
     private CameraProp prop;
 
+    private GameInputSystem Input => GameManager.Instance.GameInput;
     private Transform CamTrans => mainCam.transform;
     private Vector3 CurrentPos => mainCam.transform.position;
     private float CurrentFov => mainCam.fieldOfView;
@@ -31,17 +31,17 @@ public class CameraControl : MonoBehaviour
 
     private void UpdateProp()
     {
-        prop.MoveDir = (CamTrans.forward * input.Move.y + CamTrans.right * input.Move.x);
+        prop.MoveDir = (CamTrans.forward * Input.Move.y + CamTrans.right * Input.Move.x);
         prop.MoveDir.y = 0;
         prop.TargetPos += prop.MoveDir * (attr.moveSpeed * Time.deltaTime);
-        prop.IsMove = input.Move != Vector2.zero;
+        prop.IsMove = Input.Move != Vector2.zero;
 
-        prop.RotateAngle = input.Rotate * attr.rotateSpeed;
-        prop.IsRotate = input.Rotate != 0f;
+        prop.RotateAngle = Input.Rotate * attr.rotateSpeed;
+        prop.IsRotate = Input.Rotate != 0f;
         
-        prop.TargetFov -= input.Zoom * attr.zoomSpeed;
+        prop.TargetFov -= Input.Zoom * attr.zoomSpeed;
         prop.TargetFov = Mathf.Clamp(prop.TargetFov, attr.minZoomFov, attr.maxZoomFov);
-        prop.IsZoom = input.Zoom != 0f;
+        prop.IsZoom = Input.Zoom != 0f;
     }
 
 

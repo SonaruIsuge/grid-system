@@ -5,34 +5,42 @@ namespace SNR_BuildSystem
 {
     public class PreviewManager : MonoBehaviour
     {
-        [SerializeField] private GameManager gameManager;
         [SerializeField] private Transform pointIndicator;
         [SerializeField] private Transform tileIndicator;
 
-        private Camera MainCam => Camera.main;
-        private Grid<PathFindableTile> Grid => gameManager.GameBoard.Grid;
-        private GameInputSystem Input => gameManager.GameInputSystem;
+        private bool isSetup = false;
+        private Grid<PathFindableTile> grid;
+        private GameInputSystem input;
+        private Vector3 currentPoint;        
 
-        private Vector3 currentPoint;
+        private Camera MainCam => Camera.main;
         
-        
+        public void Setup(Grid<PathFindableTile> grid, GameInputSystem input)
+        {
+            this.grid = grid;
+            this.input = input;
+            isSetup = true;
+        }
+
         
         private bool TryGetMouseInGrid(out Vector3 pos, out Vector2Int index)
         {
             index = new Vector2Int();
             pos = Vector3.zero;
         
+            if (!isSetup) return false;
+
             var plane = new Plane(Vector3.up, 0);
-            var ray = MainCam.ScreenPointToRay(Input.MousePosition);
+            var ray = MainCam.ScreenPointToRay(input.MousePosition);
 
             if (!plane.Raycast(ray, out var distance))
                 return false;
         
             pos = ray.GetPoint(distance);
 
-            index = Grid.GetGridIndex(pos);
+            index = grid.GetGridIndex(pos);
         
-            return Grid.CheckCellExist(index.x, index.y);
+            return grid.CheckCellExist(index.x, index.y);
         }
     }
 }

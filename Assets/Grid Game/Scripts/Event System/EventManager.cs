@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UtilSNR.Common;
 
 namespace SNR_Event
 {
-    public class EventManager : TSingletonMonoBehaviour<EventManager>
+    public class EventManager : TSingletonBehaviour<EventManager>
     {
-        private static Dictionary<Type, List<Delegate>> actionDictionary;
+        public delegate void EventDelegate<T>(T args) where T : CustomEvent;
+
+        private static Dictionary<Type, Delegate> actionDictionary = new();
 
         /// <summary> A safer way to subscribe to an event. Checks if the instance exists before trying to subscribe. </summary>
-        public static void Register<T>(Action<T> callback) where T : CustomEvent
+        public static void Register<T>(EventDelegate<T> callback) where T : CustomEvent
         {
-            if (IsApplicationQuiting)
-                return;
-
             var instance = ExistingInstance != null ? ExistingInstance : Instance;
 
             if (instance == null)
@@ -23,11 +23,8 @@ namespace SNR_Event
         }
 
         /// <summary> A safer way to unsubscribe from an event. Checks if the instance exists before trying to unsubscribe. </summary>
-        public static void Unregister<T>(Action<T> callback) where T : CustomEvent
+        public static void Unregister<T>(EventDelegate<T> callback) where T : CustomEvent
         {
-            if (IsApplicationQuiting)
-                return;
-
             var instance = ExistingInstance != null ? ExistingInstance : Instance;
 
             if (instance == null)
@@ -39,9 +36,6 @@ namespace SNR_Event
         /// <summary> A safer way to raise an event. Checks if the instance exists before trying to publish. </summary>
         public static void RaiseEvent<T>(T args) where T : CustomEvent
         {
-            if (IsApplicationQuiting)
-                return;
-
             var instance = ExistingInstance != null ? ExistingInstance : Instance;
 
             if (instance == null)
@@ -60,50 +54,85 @@ namespace SNR_Event
             actionDictionary = null;
         }
 
-        private void RegisterInstance<T>(Action<T> callback) where T : CustomEvent
+        /// <summary> Clear subscriptions for a specific event type </summary>
+        public static void ClearSubscriptions<T>() where T : CustomEvent
         {
             var eventType = typeof(T);
-            actionDictionary ??= new Dictionary<Type, List<Delegate>>();
 
-            if (!actionDictionary.ContainsKey(eventType))
+            actionDictionary.Remove(eventType);
+        } 
+
+
+        private void RegisterInstance<T>(EventDelegate<T> callback) where T : CustomEvent
+        {
+            var eventType = typeof(T);
+
+            if (actionDictionary.TryGetValue(eventType, out var existDelegate))
             {
-                actionDictionary.Add(eventType, new List<Delegate>());
+                Delegate.Combine(existDelegate, callback);
+            }
+            else
+            {
+                actionDictionary[eventType] = callback;
             }
 
-            if (!actionDictionary[eventType].Contains(callback))
-            {
-                actionDictionary[eventType].Add(callback);
-            }
+            //if (!actionDictionary.ContainsKey(eventType))
+            //{
+            //    actionDictionary.Add(eventType, new List<Delegate>());
+            //}
+
+            //if (!actionDictionary[eventType].Contains(callback))
+            //{
+            //    actionDictionary[eventType].Add(callback);
+            //}
         }
 
-        private void UnregisterInstance<T>(Action<T> callback) where T : CustomEvent
+        private void UnregisterInstance<T>(EventDelegate<T> callback) where T : CustomEvent
         {
-            if (actionDictionary == null)
-                return;
-
-            var type = typeof(T);
-            if (!actionDictionary.ContainsKey(type))
-                return;
-
-            if (actionDictionary[type].Contains(callback))
+            var eventType = typeof(T);
+            if(actionDictionary.TryGetValue(eventType, out var existDelegate))
             {
-                actionDictionary[type].Remove(callback);
+                var newDelegate = Delegate.Remove(existDelegate, callback);
+
+                if(newDelegate != null)
+                {
+                    actionDictionary[eventType] = newDelegate;
+                }
+                else
+                {
+                    actionDictionary.Remove(eventType);
+                }
             }
+
+            //if (actionDictionary == null)
+            //    return;
+
+            //var type = typeof(T);
+            //if (!actionDictionary.ContainsKey(type))
+            //    return;
+
+            //if (actionDictionary[type].Contains(callback))
+            //{
+            //    actionDictionary[type].Remove(callback);
+            //}
         }
 
         private void RaiseEventInstance<T>(T args) where T : CustomEvent
         {
-            if (actionDictionary == null)
-                return;
-
-            var type = typeof(T);
-            if (actionDictionary.ContainsKey(type))
+            //if (actionDictionary == null)
+            //    return;
+            var eventType = typeof(T);
+            
+            if (actionDictionary.TryGetValue(eventType, out var existDelegate))
             {
-                var actions = actionDictionary[type];
-                foreach (var action in actions.Cast<Action<T>>().ToList())
-                {
-                    action(args);
-                }
+                var callback = existDelegate as EventDelegate<T>;
+                callback?.Invoke(args);
+
+                //var actions = actionDictionary[eventType];
+                //foreach (var action in actions.Cast<Action<T>>().ToList())
+                //{
+                //    action(args);
+                //}
             }
         }
     }

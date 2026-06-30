@@ -1,9 +1,8 @@
 
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GameInputSystem : MonoBehaviour
+public class GameInputSystem
 {
     private UserInputControl inputControl;
     public Vector2 MousePosition { get; private set; }
@@ -13,14 +12,11 @@ public class GameInputSystem : MonoBehaviour
     public float Rotate { get; private set; }
     public bool RotateObj => inputControl.InGame.RotateObj.WasPressedThisFrame();
 
-
-    public void Init()
+    public GameInputSystem()
     {
         inputControl = new UserInputControl();
         inputControl.InGame.Enable();
     }
-
-
 
     public void RegisterInput()
     {

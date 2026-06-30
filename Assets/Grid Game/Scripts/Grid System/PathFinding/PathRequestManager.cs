@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using SonaruUtilities;
+using UtilSNR.Common;
 using UnityEngine;
 
 namespace SNR_PathFinding
@@ -38,7 +38,7 @@ namespace SNR_PathFinding
     }
     
     
-    public class PathRequestManager : TSingletonMonoBehaviour<PathRequestManager>
+    public class PathRequestManager : TSingletonBehaviour<PathRequestManager>
     {
         private Queue<PathResult> pathResults;
         private PathFinding pathFinding;
