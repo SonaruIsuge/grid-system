@@ -1,6 +1,5 @@
 
-using System;
-using SNR_BuildSystem;
+using SNR_Event;
 using SNR_PathFinding;
 using UnityEngine;
 
@@ -31,13 +30,13 @@ public class TestPlayer : MonoBehaviour
 
     private void OnEnable()
     {
-        gameManager.UIManager.OnItemButtonClick += SetCurrentItem;
+        EventManager.Register<OnSelectPlaceableItem>(Event_OnSelectPlaceableItem);
     }
 
 
     private void OnDisable()
     {
-        gameManager.UIManager.OnItemButtonClick -= SetCurrentItem;
+        EventManager.Unregister<OnSelectPlaceableItem>(Event_OnSelectPlaceableItem);
     }
 
 
@@ -73,9 +72,8 @@ public class TestPlayer : MonoBehaviour
         return Grid.CheckCellExist(index.x, index.y);
     }
 
-
-    private void SetCurrentItem(int id)
+    private void Event_OnSelectPlaceableItem(OnSelectPlaceableItem args)
     {
-        currentItemId = id;
+        currentItemId = args.Id;
     }
 }

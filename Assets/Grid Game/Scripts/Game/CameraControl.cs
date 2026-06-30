@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class CameraControl : MonoBehaviour
 {
     [SerializeField] private Camera mainCam;
-    
     [SerializeField] private CameraControlAttr attr;
+
     private CameraProp prop;
 
     private GameInputSystem Input => GameManager.Instance.GameInput;

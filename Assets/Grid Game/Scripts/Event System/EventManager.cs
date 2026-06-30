@@ -75,16 +75,6 @@ namespace SNR_Event
             {
                 actionDictionary[eventType] = callback;
             }
-
-            //if (!actionDictionary.ContainsKey(eventType))
-            //{
-            //    actionDictionary.Add(eventType, new List<Delegate>());
-            //}
-
-            //if (!actionDictionary[eventType].Contains(callback))
-            //{
-            //    actionDictionary[eventType].Add(callback);
-            //}
         }
 
         private void UnregisterInstance<T>(EventDelegate<T> callback) where T : CustomEvent
@@ -103,36 +93,16 @@ namespace SNR_Event
                     actionDictionary.Remove(eventType);
                 }
             }
-
-            //if (actionDictionary == null)
-            //    return;
-
-            //var type = typeof(T);
-            //if (!actionDictionary.ContainsKey(type))
-            //    return;
-
-            //if (actionDictionary[type].Contains(callback))
-            //{
-            //    actionDictionary[type].Remove(callback);
-            //}
         }
 
         private void RaiseEventInstance<T>(T args) where T : CustomEvent
         {
-            //if (actionDictionary == null)
-            //    return;
             var eventType = typeof(T);
             
             if (actionDictionary.TryGetValue(eventType, out var existDelegate))
             {
                 var callback = existDelegate as EventDelegate<T>;
                 callback?.Invoke(args);
-
-                //var actions = actionDictionary[eventType];
-                //foreach (var action in actions.Cast<Action<T>>().ToList())
-                //{
-                //    action(args);
-                //}
             }
         }
     }

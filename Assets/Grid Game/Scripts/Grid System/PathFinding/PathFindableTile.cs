@@ -45,7 +45,11 @@ namespace SNR_PathFinding
                 return;
             
             Walkable = walkable;
-            EventManager.RaiseEvent(new OnTileChangeWalkable(this, walkable));
+            EventManager.RaiseEvent(new OnTileChangeWalkable 
+            {
+                Tile = this,
+                Walkable = walkable
+            });
         }
 
 

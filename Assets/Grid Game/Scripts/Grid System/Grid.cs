@@ -93,7 +93,12 @@ public class Grid<TGridData> where TGridData : IGridTile
             return;
 
         gridDataArray[xIndex, yIndex] = data;
-        EventManager.RaiseEvent<OnGridDataChanged<TGridData>>(new OnGridDataChanged<TGridData>(this, xIndex, yIndex, data));
+        EventManager.RaiseEvent<OnGridDataChanged<TGridData>>(new() {
+            Grid = this, 
+            XIndex = xIndex, 
+            YIndex = yIndex, 
+            Data = data
+        });
     }
 
 
