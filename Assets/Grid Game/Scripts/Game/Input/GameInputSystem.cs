@@ -10,7 +10,7 @@ public class GameInputSystem
     public Vector2 Move { get; private set; }
     public float Zoom { get; private set; }
     public float Rotate { get; private set; }
-    public bool RotateObj => inputControl.InGame.RotateObj.WasPressedThisFrame();
+    public bool RotateObj => inputControl.InGame.RotateObj.WasPerformedThisFrame();
 
     public GameInputSystem()
     {

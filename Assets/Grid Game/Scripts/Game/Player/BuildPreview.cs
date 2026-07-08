@@ -37,12 +37,13 @@ public class BuildPreview
         }
     }
 
-    public void UpdatePreview(int xIndex, int yIndex)
+    public void UpdatePreview(Vector3 position, Quaternion rotation)
     {
         if (!currentPreviewObj)
             return;
-        var previewPos = GameManager.Instance.GameBoard.Grid.GetCellCorner(xIndex, yIndex, CornerType.LeftBottom);
-        currentPreviewObj.position = previewPos + anchorCenterOffset;
+        
+        currentPreviewObj.position = position;
+        currentPreviewObj.rotation = rotation;
     }
     
     private Transform GetAnchor(Transform previewObj)

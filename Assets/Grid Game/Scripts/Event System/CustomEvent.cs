@@ -1,4 +1,5 @@
-﻿using SNR_PathFinding;
+﻿using SNR_BuildSystem;
+using SNR_PathFinding;
 
 namespace SNR_Event
 {
@@ -32,10 +33,13 @@ namespace SNR_Event
         public int Id;
     }
 
+    public struct OnRotateItem : CustomEvent
+    {
+        public ItemFacing Facing;
+    }
+
     public struct OnPlaceItem : CustomEvent
     {
-        public int Id;
-        public int XIndex;
-        public int YIndex;
+        public PlaceItemData Data;
     }
 }

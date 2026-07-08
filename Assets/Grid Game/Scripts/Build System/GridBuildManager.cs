@@ -1,4 +1,5 @@
 
+using System;
 using SNR_PathFinding;
 using UnityEngine;
 using UtilSNR.Common;
@@ -8,10 +9,19 @@ namespace SNR_BuildSystem
 {
     public enum ItemFacing
     {
-        Up,
-        Right,
-        Down,
-        Left
+        Up = 0,
+        Left = 90,
+        Down = 180,
+        Right = 270
+    }
+
+    [Serializable]
+    public struct PlaceItemData
+    {
+        public int ItemID;
+        public int XIndex;
+        public int YIndex;
+        public ItemFacing Facing;
     }
     
     public class GridBuildManager : TSceneSingletonBehaviour<GridBuildManager>
@@ -32,21 +42,23 @@ namespace SNR_BuildSystem
         }
         
 
-        public void PlaceTiledItem(TiledPlaceable item, int xIndex, int yIndex)
+        public void PlaceTiledItem(TiledPlaceable item, int xIndex, int yIndex,  ItemFacing itemFacing)
         {
-            if (!Board)
+            if (!Board || !item)
                 return;
 
             var itemCellSize = WorldSizeToCellSize(item.Width, item.Height);
-            if(!CheckTilesPlaceable(xIndex, yIndex, itemCellSize.x, itemCellSize.y))
+            var rotatedCellSize = GetRotatedItemCellSize(itemCellSize, itemFacing);
+            
+            if(!CheckTilesPlaceable(xIndex, yIndex, rotatedCellSize.x, rotatedCellSize.y))
                 return;
             
-            var initItemPos = Grid.GetCellCorner(xIndex, yIndex, CornerType.LeftBottom) + item.AnchorCenterOffset;
-            PoolManager.Instance.Spawn(item, initItemPos, Quaternion.identity);
+            var initItemPos = GetRotatedPlaceItemPos(item, xIndex, yIndex, itemFacing);
+            PoolManager.Instance.Spawn(item, initItemPos, Quaternion.Euler(0, (int)itemFacing, 0));
             
-            for (var y = yIndex; y < yIndex + itemCellSize.y; y++)
+            for (var y = yIndex; y < yIndex + rotatedCellSize.y; y++)
             {
-                for (var x = xIndex; x < xIndex + itemCellSize.x; x++)
+                for (var x = xIndex; x < xIndex + rotatedCellSize.x; x++)
                 {
                     var tileData = Grid.GetData(x, y);
                     tileData.SetPlaceable(false);
@@ -59,23 +71,65 @@ namespace SNR_BuildSystem
         }
 
 
-        public void PlaceTiledItem(int itemID, int xIndex, int yIndex)
+        public void PlaceTiledItem(int itemID, int xIndex, int yIndex,  ItemFacing itemFacing)
         {
             var item = tiledItemList.GetItemById(itemID);
             
             if (!item)
                 return;
             
-            PlaceTiledItem(item, xIndex, yIndex);
+            PlaceTiledItem(item, xIndex, yIndex, itemFacing);
         }
 
+        public void PlaceTiledItem(PlaceItemData data)
+        {
+            var item = tiledItemList.GetItemById(data.ItemID);
+            
+            if (!item)
+                return;
+            
+            PlaceTiledItem(item, data.XIndex, data.YIndex, data.Facing);
+        }
 
+        public Vector3 GetRotatedPlaceItemPos(TiledPlaceable item, int xIndex, int yIndex, ItemFacing facing)
+        {
+            if(!item)
+                return Vector3.zero;
+            
+            var rot = Quaternion.Euler(0, (int)facing, 0);
+            
+            var rotatedOffset = rot * item.AnchorCenterOffset;
+            
+            var rotatedFootprint = rot * new Vector3(item.Width, 0, item.Height);
+            var correction = new Vector3(Mathf.Max(0, -rotatedFootprint.x), 0, Mathf.Max(0, -rotatedFootprint.z));
+            
+            return Grid.GetCellCorner(xIndex, yIndex, CornerType.LeftBottom) + rotatedOffset + correction;
+        }
+
+        public Vector3 GetRotatedPlaceItemPos(PlaceItemData data)
+        {
+            var item = tiledItemList.GetItemById(data.ItemID);
+            return GetRotatedPlaceItemPos(item, data.XIndex, data.YIndex, data.Facing);
+        }
+        
         private Vector2Int WorldSizeToCellSize(float width, float height)
         {
             return new Vector2Int
             {
                 x = Mathf.CeilToInt(width / Grid.CellSize),
                 y = Mathf.CeilToInt(height / Grid.CellSize)
+            };
+        }
+
+        private Vector2Int GetRotatedItemCellSize(Vector2Int cellSize, ItemFacing itemFacing)
+        {
+            return itemFacing switch
+            {
+                ItemFacing.Up => cellSize,
+                ItemFacing.Left => new Vector2Int(cellSize.y, cellSize.x),
+                ItemFacing.Down => cellSize,
+                ItemFacing.Right => new Vector2Int(cellSize.y, cellSize.x),
+                _ => cellSize
             };
         }
 

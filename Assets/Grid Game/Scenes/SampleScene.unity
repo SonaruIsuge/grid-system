@@ -889,7 +889,7 @@ MonoBehaviour:
   drawTile: 1
   drawBoard: 1
   drawObstacle: 1
-  drawPath: 0
+  drawPath: 1
 --- !u!4 &1498879056
 Transform:
   m_ObjectHideFlags: 0

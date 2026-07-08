@@ -2,19 +2,16 @@
 using SNR_BuildSystem;
 using SNR_Event;
 using SNR_PathFinding;
+using SonaruUtilities;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class TestPlayer : MonoBehaviour
 {
-    [SerializeField] 
-    private PlayerVisual playerVisual = new();
-
-    [SerializeField] 
-    private BuildPreview preview = new();
+    [SerializeField] private PlayerVisual playerVisual = new();
+    [SerializeField] private BuildPreview preview = new();
     
-    // private PlayerVisual playerVisual;
-    // private BuildPreview preview;
-    private int currentItemId;
+    private PlaceItemData currentItemData;
     private Vector3 mouseInGridPos;
     private Vector2Int mouseInGridIndex;
     
@@ -25,9 +22,13 @@ public class TestPlayer : MonoBehaviour
 
     private void Awake()
     {
-        // playerVisual = new PlayerVisual(playerPosObj, playerTileObj);
-        // preview = new BuildPreview();
-        currentItemId = -1;
+        currentItemData = new PlaceItemData
+        {
+            ItemID = -1,
+            XIndex = 0,
+            YIndex = 0,
+            Facing = ItemFacing.Up
+        }; 
     }
 
 
@@ -47,16 +48,27 @@ public class TestPlayer : MonoBehaviour
     {
         if (!TryGetMouseInGrid(out mouseInGridPos, out mouseInGridIndex)) 
             return;
+        
+        currentItemData.XIndex = mouseInGridIndex.x;
+        currentItemData.YIndex = mouseInGridIndex.y;
+        
+        playerVisual.UpdatePlayerGrid(mouseInGridPos, Grid.GetWorldPosition(currentItemData.XIndex, currentItemData.YIndex));
 
-        var tilePos = Grid.GetWorldPosition(mouseInGridIndex.x, mouseInGridIndex.y);
+        if (currentItemData.ItemID < 0)
+            return;
         
-        playerVisual.UpdatePlayerGrid(mouseInGridPos, tilePos);
-        preview.UpdatePreview(mouseInGridIndex.x, mouseInGridIndex.y);
+        var pos = GridBuildManager.Instance.GetRotatedPlaceItemPos(currentItemData);
+        var rotate = Quaternion.Euler(0, (int)currentItemData.Facing, 0);
+        preview.UpdatePreview(pos, rotate);
         
-        // Place the item
+        if (Input.RotateObj)
+        {
+            RotateItem();
+        }
+        
         if (Input.LeftMouseDown)
         {
-            GridBuildManager.Instance.PlaceTiledItem(currentItemId, mouseInGridIndex.x, mouseInGridIndex.y);
+            PlaceItem();
         }
     }
 
@@ -79,6 +91,26 @@ public class TestPlayer : MonoBehaviour
         return Grid.CheckCellExist(index.x, index.y);
     }
 
+    private void RotateItem()
+    {
+        currentItemData.Facing = currentItemData.Facing.Next();
+        
+        EventManager.RaiseEvent(new OnRotateItem
+        {
+            Facing = currentItemData.Facing
+        });
+    }
+
+    private void PlaceItem()
+    {
+        GridBuildManager.Instance.PlaceTiledItem(currentItemData);
+        
+        EventManager.RaiseEvent(new OnPlaceItem
+        {
+            Data = currentItemData
+        });
+    }
+    
     private void Event_OnSelectPlaceableItem(OnSelectPlaceableItem args)
     {
         var itemData = GridBuildManager.Instance.GetTiledItemData(args.Id);
@@ -86,7 +118,8 @@ public class TestPlayer : MonoBehaviour
         if (itemData == null)
             return;
         
-        currentItemId = args.Id;
+        currentItemData.ItemID = args.Id;
+        currentItemData.Facing = ItemFacing.Up;
         preview.SetPreview(itemData.PreviewObj);
     }
 }
