@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 4
   Name: Pillar
-  TiledPlaceable: {fileID: 6898634405476497817, guid: 844672c20afcd8b44ae20569202914d0,
-    type: 3}
   WorldSize: {x: 0.5, y: 0.5}
   Walkable: 0
   Category: 0
+  PreviewObj: {fileID: 6898634405476497817, guid: 17b862a6cdbac8446a4b358bcd890ac3,
+    type: 3}

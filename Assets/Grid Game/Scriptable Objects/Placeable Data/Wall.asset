@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 2
   Name: Wall
-  TiledPlaceable: {fileID: 3817109869761035241, guid: 9124bbc50e7fc4d4793ce18c7b93ed35,
-    type: 3}
   WorldSize: {x: 2, y: 0.5}
   Walkable: 0
   Category: 0
+  PreviewObj: {fileID: 3817109869761035241, guid: 461d8c47eb71ae1469c842194a35d064,
+    type: 3}

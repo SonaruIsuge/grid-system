@@ -31,4 +31,11 @@ namespace SNR_Event
     {
         public int Id;
     }
+
+    public struct OnPlaceItem : CustomEvent
+    {
+        public int Id;
+        public int XIndex;
+        public int YIndex;
+    }
 }

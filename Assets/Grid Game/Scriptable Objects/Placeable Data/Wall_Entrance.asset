@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 3
   Name: Entrance
-  TiledPlaceable: {fileID: 5361320848131654205, guid: d059266b06ca2844dbd1f27c1aa29e91,
-    type: 3}
   WorldSize: {x: 2, y: 0.5}
   Walkable: 1
   Category: 2
+  PreviewObj: {fileID: 5361320848131654205, guid: a28ba86e22883b04fb0ac6cdb4743242,
+    type: 3}

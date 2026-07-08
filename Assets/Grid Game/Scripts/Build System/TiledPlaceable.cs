@@ -22,12 +22,5 @@ namespace SNR_BuildSystem
         {
             Placed = true;
         }
-
-
-        private Transform GetAnchor()
-        {
-            var transforms = GetComponentsInChildren<Transform>();
-            return transforms.Length > 1 ? transforms[1] : transforms[0];
-        }
     }
 }

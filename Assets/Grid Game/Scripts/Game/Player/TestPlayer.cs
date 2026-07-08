@@ -1,29 +1,32 @@
 
+using SNR_BuildSystem;
 using SNR_Event;
 using SNR_PathFinding;
 using UnityEngine;
 
 public class TestPlayer : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
+    [SerializeField] 
+    private PlayerVisual playerVisual = new();
 
-    [Header("Visual Elements")] 
-    [SerializeField] private Transform playerPosObj;
-    [SerializeField] private Transform playerTileObj;
+    [SerializeField] 
+    private BuildPreview preview = new();
     
-    private PlayerVisual playerVisual;
+    // private PlayerVisual playerVisual;
+    // private BuildPreview preview;
     private int currentItemId;
     private Vector3 mouseInGridPos;
     private Vector2Int mouseInGridIndex;
     
     private Camera MainCam => Camera.main;
-    private Grid<PathFindableTile> Grid => gameManager.GameBoard.Grid;
-    private GameInputSystem Input => gameManager.GameInput;
+    private Grid<PathFindableTile> Grid => GameManager.Instance.GameBoard.Grid;
+    private GameInputSystem Input => GameManager.Instance.GameInput;
 
 
     private void Awake()
     {
-        playerVisual = new PlayerVisual(playerPosObj, playerTileObj);
+        // playerVisual = new PlayerVisual(playerPosObj, playerTileObj);
+        // preview = new BuildPreview();
         currentItemId = -1;
     }
 
@@ -42,14 +45,18 @@ public class TestPlayer : MonoBehaviour
 
     private void Update()
     {
-        if (TryGetMouseInGrid(out mouseInGridPos, out mouseInGridIndex))
+        if (!TryGetMouseInGrid(out mouseInGridPos, out mouseInGridIndex)) 
+            return;
+
+        var tilePos = Grid.GetWorldPosition(mouseInGridIndex.x, mouseInGridIndex.y);
+        
+        playerVisual.UpdatePlayerGrid(mouseInGridPos, tilePos);
+        preview.UpdatePreview(mouseInGridIndex.x, mouseInGridIndex.y);
+        
+        // Place the item
+        if (Input.LeftMouseDown)
         {
-            playerVisual.UpdatePlayerGrid(mouseInGridPos, Grid.GetWorldPosition(mouseInGridIndex.x, mouseInGridIndex.y));
-            
-            if (Input.LeftMouseDown)
-            {
-                gameManager.GridBuildManager.PlaceTiledItem(currentItemId, mouseInGridIndex.x, mouseInGridIndex.y);
-            }
+            GridBuildManager.Instance.PlaceTiledItem(currentItemId, mouseInGridIndex.x, mouseInGridIndex.y);
         }
     }
 
@@ -58,7 +65,7 @@ public class TestPlayer : MonoBehaviour
     {
         index = new Vector2Int();
         pos = Vector3.zero;
-        
+                
         var plane = new Plane(Vector3.up, 0);
         var ray = MainCam.ScreenPointToRay(Input.MousePosition);
 
@@ -74,6 +81,12 @@ public class TestPlayer : MonoBehaviour
 
     private void Event_OnSelectPlaceableItem(OnSelectPlaceableItem args)
     {
+        var itemData = GridBuildManager.Instance.GetTiledItemData(args.Id);
+
+        if (itemData == null)
+            return;
+        
         currentItemId = args.Id;
+        preview.SetPreview(itemData.PreviewObj);
     }
 }

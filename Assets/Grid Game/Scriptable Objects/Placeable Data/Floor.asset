@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 0
   Name: Floor1
-  TiledPlaceable: {fileID: 5815484700335838081, guid: 14f9df6e90eaaef4c9b06f4e408c7531,
-    type: 3}
   WorldSize: {x: 4, y: 4}
   Walkable: 1
   Category: 2
+  PreviewObj: {fileID: 5815484700335838081, guid: ec5e7e335a2ce8f45bd0bcf825273614,
+    type: 3}

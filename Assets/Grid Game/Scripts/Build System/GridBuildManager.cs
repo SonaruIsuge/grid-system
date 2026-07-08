@@ -1,6 +1,8 @@
 
 using SNR_PathFinding;
 using UnityEngine;
+using UtilSNR.Common;
+using UtilSNR.Pool;
 
 namespace SNR_BuildSystem
 {
@@ -12,7 +14,7 @@ namespace SNR_BuildSystem
         Left
     }
     
-    public class GridBuildManager : MonoBehaviour
+    public class GridBuildManager : TSceneSingletonBehaviour<GridBuildManager>
     {
         [SerializeField] private TiledItemList tiledItemList;
 
@@ -22,9 +24,17 @@ namespace SNR_BuildSystem
         private Grid<PathFindableTile> Grid => Board != null? Board.Grid : null;
 
 
+        public PlaceableData GetTiledItemData(int id)
+        {
+            var item = tiledItemList.GetItemById(id);
+            
+            return item ? item.Data : null;
+        }
+        
+
         public void PlaceTiledItem(TiledPlaceable item, int xIndex, int yIndex)
         {
-            if (Board == null)
+            if (!Board)
                 return;
 
             var itemCellSize = WorldSizeToCellSize(item.Width, item.Height);
@@ -32,7 +42,7 @@ namespace SNR_BuildSystem
                 return;
             
             var initItemPos = Grid.GetCellCorner(xIndex, yIndex, CornerType.LeftBottom) + item.AnchorCenterOffset;
-            Instantiate(item, initItemPos, Quaternion.identity);
+            PoolManager.Instance.Spawn(item, initItemPos, Quaternion.identity);
             
             for (var y = yIndex; y < yIndex + itemCellSize.y; y++)
             {
@@ -52,10 +62,9 @@ namespace SNR_BuildSystem
         public void PlaceTiledItem(int itemID, int xIndex, int yIndex)
         {
             var item = tiledItemList.GetItemById(itemID);
-            if (item == null)
-            {
+            
+            if (!item)
                 return;
-            }
             
             PlaceTiledItem(item, xIndex, yIndex);
         }

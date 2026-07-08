@@ -7,9 +7,9 @@ namespace SNR_BuildSystem
     {
         public int ID;
         public string Name;
-        public GameObject TiledPlaceable;
         public Vector2 WorldSize;
         public bool Walkable;
         public TileCategory Category;
+        public GameObject PreviewObj;
     }
 }
