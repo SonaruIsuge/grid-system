@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2841283675181947703}
   - component: {fileID: 6350675693123334601}
   - component: {fileID: 6474069575642563790}
+  - component: {fileID: 7913581021244620701}
   m_Layer: 0
   m_Name: Pillar
   m_TagString: Untagged
@@ -106,6 +107,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anchor: {fileID: 3170190415091751424}
   placeableData: {fileID: 11400000, guid: 207d39cc3184b6f41936c75c624c40b7, type: 2}
+--- !u!65 &7913581021244620701
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6898634405476497817}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.61029875, y: 3.0517352, z: 0.61029875}
+  m_Center: {x: -0.00000013411045, y: 1.5260864, z: 0.00000011920929}
 --- !u!1 &8113191838973645838
 GameObject:
   m_ObjectHideFlags: 0

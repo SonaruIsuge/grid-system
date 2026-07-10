@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using SNR_BuildSystem;
 using SNR_PathFinding;
-using SonaruUtilities;
-using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -19,6 +18,8 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private bool blurPenalty;
     [SerializeField] [Range(0, 10)] private int blurSize = 3;
 
+    [SerializeField] private Transform presetItemRoot;
+    
     private Grid<PathFindableTile> grid;
     private Dictionary<TileCategory, int> penaltyDict;
     
@@ -42,8 +43,8 @@ public class GameBoard : MonoBehaviour
     private void Start()
     {
         AutoSetObstacle();
+        SetPresetItemData();
         if(blurPenalty) BlurPenaltyMap();
-        TilesSetOriginState();
     }
 
 
@@ -118,6 +119,47 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    private void SetPresetItemData()
+    {
+        var items = presetItemRoot.GetComponentsInChildren<TiledPlaceable>();
+        var buildManager = GridBuildManager.Instance;
+        
+        foreach (var item in items)
+        {
+            var itemFacing = GetPresetItemFacing(item);
+            var startIndex = GetPresetItemStartIndex(item, itemFacing);
+            buildManager.SetTiledItemData(item, startIndex.x, startIndex.y, itemFacing);
+        }
+    }
+
+    private Vector2Int GetPresetItemStartIndex(TiledPlaceable item, ItemFacing facing)
+    {
+        var rot = Quaternion.Euler(0, (int)facing, 0);
+
+        var rotatedOffset = item.AnchorCenterOffset; // Since item already placed in scene, the AnchorCenterOffset already rotated
+        var rotatedFootprint = rot * new Vector3(item.Width, 0, item.Height);
+        var correction = new Vector3(Mathf.Max(0, -rotatedFootprint.x), 0, Mathf.Max(0, -rotatedFootprint.z));
+        var leftBottomCorner = item.transform.position - rotatedOffset - correction;
+        
+        var startCellCenter = leftBottomCorner + new Vector3(grid.CellSize / 2, 0, grid.CellSize / 2);
+
+        return Grid.GetGridIndex(startCellCenter);
+    }
+
+    private ItemFacing GetPresetItemFacing(TiledPlaceable item)
+    {
+        var rot = item.transform.rotation;
+        var snappedRotation = Mathf.RoundToInt(rot.eulerAngles.y / 90f) * 90;
+        snappedRotation = (snappedRotation % 360 + 360) % 360;
+        return snappedRotation switch
+        {
+            90 => ItemFacing.Left,
+            180 => ItemFacing.Down,
+            270 => ItemFacing.Right,
+            _ => ItemFacing.Up
+        };
+    }
+
 
     private void BlurPenaltyMap()
     {
@@ -169,17 +211,6 @@ public class GameBoard : MonoBehaviour
 
                 maxPenalty = Mathf.Max(blurPenalty, maxPenalty);
                 minPenalty = Mathf.Min(blurPenalty, minPenalty);
-            }
-        }
-    }
-
-    private void TilesSetOriginState()
-    {
-        for (var x = 0; x < grid.ColumnNumber; x++)
-        {
-            for (var y = 0; y < grid.RowNumber; y++)
-            {
-                grid.GetData(x, y).SetOriginState();
             }
         }
     }

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5543559712245814501}
   - component: {fileID: 4976591188312346249}
   - component: {fileID: 3041470533622714883}
+  - component: {fileID: 3852789758734938648}
   m_Layer: 0
   m_Name: Wall_EntranceTile
   m_TagString: Untagged
@@ -107,6 +108,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anchor: {fileID: 2555370352501860739}
   placeableData: {fileID: 11400000, guid: 4bb96e0d174aa55459abef55d774c3e1, type: 2}
+--- !u!65 &3852789758734938648
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5361320848131654205}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 2.9997122, z: 0.39999998}
+  m_Center: {x: 0.00000023841858, y: 1.5001439, z: 0}
 --- !u!1 &6032679008002336641
 GameObject:
   m_ObjectHideFlags: 0

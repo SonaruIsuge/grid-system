@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2147482658840520058}
   - component: {fileID: 6469979320900889818}
   - component: {fileID: 127854340996714105}
+  - component: {fileID: 6419015828899404913}
   m_Layer: 0
   m_Name: WallTile
   m_TagString: Untagged
@@ -106,6 +107,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anchor: {fileID: 5512360651523237842}
   placeableData: {fileID: 11400000, guid: 3f380c2d5eb75c54b95e00dbcb97bb3a, type: 2}
+--- !u!65 &6419015828899404913
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3817109869761035241}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 2.9990404, z: 0.39999998}
+  m_Center: {x: 0.00000023841858, y: 1.5004798, z: 0}
 --- !u!1 &5473113238290193376
 GameObject:
   m_ObjectHideFlags: 0

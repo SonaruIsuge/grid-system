@@ -22,9 +22,6 @@ namespace SNR_PathFinding
 
         private Dictionary<BuildLayer, bool> layerPlaceable = new();
         
-        private bool baseWalkable;
-        private int basePathPenalty;
-        
         public int GCost;
         public int HCost;
         public int FCost;
@@ -43,9 +40,6 @@ namespace SNR_PathFinding
             {
                 layerPlaceable[(BuildLayer)layer] = true;
             }
-            
-            baseWalkable = Walkable;
-            basePathPenalty = PathPenalty;
             
             GCost = 0;
             HCost = 0;
@@ -97,19 +91,11 @@ namespace SNR_PathFinding
             layerPlaceable[buildLayer] = placeable;
         }
 
-
-        public void SetOriginState()
-        {
-            baseWalkable = Walkable;
-            basePathPenalty = PathPenalty;
-        }
-
-
         public void ResetBuildState()
         {
             SetAllPlaceable(true);
-            SetWalkable(baseWalkable);
-            SetPenalty(basePathPenalty);
+            SetWalkable(true);
+            SetPenalty(0);
         }
         
 

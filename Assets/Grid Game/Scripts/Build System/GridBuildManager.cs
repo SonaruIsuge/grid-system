@@ -40,11 +40,12 @@ namespace SNR_BuildSystem
         [SerializeField] private TiledItemList tiledItemList;
         [SerializeField] private Transform placedItemRoot;
 
+        private Dictionary<Vector2Int, List<PlacedItemRecord>> placedItemRegistry = new();
+        
         public TiledItemList TiledItemList => tiledItemList;
 
         private GameBoard Board => GameManager.Instance != null ? GameManager.Instance.GameBoard : null;
         private Grid<PathFindableTile> Grid => Board != null? Board.Grid : null;
-        private readonly Dictionary<Vector2Int, List<PlacedItemRecord>> placedItemRegistry = new();
 
         public PlaceableData GetTiledItemData(int id)
         {
@@ -53,6 +54,54 @@ namespace SNR_BuildSystem
             return item ? item.Data : null;
         }
 
+        /// <summary>
+        ///  Set placed item data without spawning item
+        /// </summary>
+        public void SetTiledItemData(TiledPlaceable instance, int xIndex, int yIndex, ItemFacing itemFacing)
+        {
+            var rotatedCellSize = GetRotatedItemCellSize(WorldSizeToCellSize(instance.Width, instance.Height), itemFacing);
+            
+            var placeData = new PlaceItemData
+            {
+                ItemID = instance.Data.ID,
+                XIndex = xIndex,
+                YIndex = yIndex,
+                Facing = itemFacing
+            };
+
+            var record = new PlacedItemRecord
+            {
+                Instance = instance,
+                Data = placeData,
+                BuildLayer = instance.Data.BuildLayer,
+                Tiles = new List<PathFindableTile>()
+            };
+
+            for (var y = yIndex; y < yIndex + rotatedCellSize.y; y++)
+            {
+                for (var x = xIndex; x < xIndex + rotatedCellSize.x; x++)
+                {
+                    var tileData = Grid.GetData(x, y);
+                    record.Tiles.Add(tileData);
+                    var cellIndex = new Vector2Int(x, y);
+                    if (!placedItemRegistry.TryGetValue(cellIndex, out var records))
+                    {
+                        records = new List<PlacedItemRecord>();
+                        placedItemRegistry[cellIndex] = records;
+                    }
+                    records.Add(record);
+                    tileData.SetBuildLayerPlaceable(instance.Data.BuildLayer, false);
+                    if(tileData.Walkable) tileData.SetWalkable(instance.Data.Walkable);
+                    tileData.SetPenalty(Board.GetPenalty(instance.Data.Category));
+                }
+            }
+
+            instance.Place(Board);
+        }
+
+        /// <summary>
+        /// Spawn tiled item and set data
+        /// </summary>
         public void PlaceTiledItem(TiledPlaceable item, int xIndex, int yIndex,  ItemFacing itemFacing)
         {
             if (!Board || !item)
@@ -75,45 +124,8 @@ namespace SNR_BuildSystem
             if (!placedItem)
                 return;
 
-            // Record placed item data
-            var placeData = new PlaceItemData
-            {
-                ItemID = item.Data.ID,
-                XIndex = xIndex,
-                YIndex = yIndex,
-                Facing = itemFacing
-            };
-
-            var record = new PlacedItemRecord
-            {
-                Instance = placedItem,
-                Data = placeData,
-                BuildLayer = item.Data.BuildLayer,
-                Tiles = new List<PathFindableTile>()
-            };
-
-            for (var y = yIndex; y < yIndex + rotatedCellSize.y; y++)
-            {
-                for (var x = xIndex; x < xIndex + rotatedCellSize.x; x++)
-                {
-                    var tileData = Grid.GetData(x, y);
-                    record.Tiles.Add(tileData);
-                    var cellIndex = new Vector2Int(x, y);
-                    if (!placedItemRegistry.TryGetValue(cellIndex, out var records))
-                    {
-                        records = new List<PlacedItemRecord>();
-                        placedItemRegistry[cellIndex] = records;
-                    }
-                    records.Add(record);
-                    tileData.SetBuildLayerPlaceable(item.Data.BuildLayer, false);
-                    tileData.SetWalkable(item.Data.Walkable);
-                    tileData.SetPenalty(Board.GetPenalty(item.Data.Category));
-                }
-            }
-
-            placedItem.Place(Board);
+            SetTiledItemData(placedItem, xIndex, yIndex, itemFacing);
         }
-
 
         public void PlaceTiledItem(int itemID, int xIndex, int yIndex,  ItemFacing itemFacing)
         {
@@ -221,7 +233,6 @@ namespace SNR_BuildSystem
                 _ => cellSize
             };
         }
-
 
         private bool CheckTilesPlaceable(BuildLayer buildLayer, int startX, int startY, int width, int height)
         {
