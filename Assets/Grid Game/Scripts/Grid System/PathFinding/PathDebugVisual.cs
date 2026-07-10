@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SNR_BuildSystem;
 using SNR_Event;
 using UnityEngine;
 
@@ -166,7 +167,7 @@ namespace SNR_PathFinding
                 {
                     for (var y = 0; y < Grid.RowNumber; y++)
                     {
-                        Gizmos.color = Grid.GetData(x, y).Placeable ? Color.white : Color.black;
+                        Gizmos.color = Grid.GetData(x, y).IsBuildLayerPlaceable(BuildLayer.Wall) ? Color.white : Color.black;
                         Gizmos.DrawCube(Grid.GetWorldPosition(x, y), Vector3.one * Grid.CellSize * 0.95f);
                     }
                 }

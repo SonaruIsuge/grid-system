@@ -1,4 +1,8 @@
-﻿using SNR_Event;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using SNR_Event;
+using SNR_BuildSystem;
 using SonaruUtilities;
 using UnityEngine;
 
@@ -15,8 +19,9 @@ namespace SNR_PathFinding
         public bool Walkable { get; private set; }
         public int HeapIndex { get; set; }
         public int PathPenalty { get; private set; }
-        public bool Placeable { get; private set; }
 
+        private Dictionary<BuildLayer, bool> layerPlaceable = new();
+        
         private bool baseWalkable;
         private int basePathPenalty;
         
@@ -33,7 +38,11 @@ namespace SNR_PathFinding
             this.YIndex = yIndex;
             Walkable = true;
             PathPenalty = 0;
-            Placeable = true;
+
+            foreach (var layer in Enum.GetValues(typeof(BuildLayer)))
+            {
+                layerPlaceable[(BuildLayer)layer] = true;
+            }
             
             baseWalkable = Walkable;
             basePathPenalty = PathPenalty;
@@ -65,9 +74,27 @@ namespace SNR_PathFinding
         }
 
 
-        public void SetPlaceable(bool placeable)
+        public void SetAllPlaceable(bool placeable)
         {
-            Placeable = placeable;
+            foreach (var key in layerPlaceable.Keys.ToList())
+            {
+                layerPlaceable[key] = placeable;
+            }
+        }
+
+
+        public bool IsBuildLayerPlaceable(BuildLayer buildLayer)
+        {
+            return layerPlaceable.ContainsKey(buildLayer) && layerPlaceable[buildLayer];
+        }
+
+
+        public void SetBuildLayerPlaceable(BuildLayer buildLayer, bool placeable)
+        {
+            if (!layerPlaceable.ContainsKey(buildLayer))
+                return;
+            
+            layerPlaceable[buildLayer] = placeable;
         }
 
 
@@ -80,7 +107,7 @@ namespace SNR_PathFinding
 
         public void ResetBuildState()
         {
-            SetPlaceable(true);
+            SetAllPlaceable(true);
             SetWalkable(baseWalkable);
             SetPenalty(basePathPenalty);
         }

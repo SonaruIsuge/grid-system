@@ -17,5 +17,6 @@ MonoBehaviour:
   WorldSize: {x: 2, y: 0.5}
   Walkable: 1
   Category: 2
+  BuildLayer: 1
   PreviewObj: {fileID: 5361320848131654205, guid: a28ba86e22883b04fb0ac6cdb4743242,
     type: 3}

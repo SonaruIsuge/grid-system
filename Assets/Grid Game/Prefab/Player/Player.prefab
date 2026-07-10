@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerVisual:
-    playerPointObj: {fileID: 2234367266591637455}
+    playerPointObj: {fileID: 0}
     playerTileObj: {fileID: 1520977119733856359}
   preview:
     opacity: 0.5

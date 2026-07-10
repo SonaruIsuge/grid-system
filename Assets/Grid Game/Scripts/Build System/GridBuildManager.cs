@@ -33,6 +33,7 @@ namespace SNR_BuildSystem
         {
             public TiledPlaceable Instance;
             public PlaceItemData Data;
+            public BuildLayer BuildLayer;
             public List<PathFindableTile> Tiles;
         }
         
@@ -43,7 +44,7 @@ namespace SNR_BuildSystem
 
         private GameBoard Board => GameManager.Instance != null ? GameManager.Instance.GameBoard : null;
         private Grid<PathFindableTile> Grid => Board != null? Board.Grid : null;
-        private readonly Dictionary<Vector2Int, PlacedItemRecord> placedItemRegistry = new();
+        private readonly Dictionary<Vector2Int, List<PlacedItemRecord>> placedItemRegistry = new();
 
         public PlaceableData GetTiledItemData(int id)
         {
@@ -60,7 +61,7 @@ namespace SNR_BuildSystem
             var itemCellSize = WorldSizeToCellSize(item.Width, item.Height);
             var rotatedCellSize = GetRotatedItemCellSize(itemCellSize, itemFacing);
             
-            if(!CheckTilesPlaceable(xIndex, yIndex, rotatedCellSize.x, rotatedCellSize.y))
+            if(!CheckTilesPlaceable(item.Data.BuildLayer, xIndex, yIndex, rotatedCellSize.x, rotatedCellSize.y))
                 return;
 
             var initItemPos = GetRotatedPlaceItemPos(item, xIndex, yIndex, itemFacing);
@@ -87,6 +88,7 @@ namespace SNR_BuildSystem
             {
                 Instance = placedItem,
                 Data = placeData,
+                BuildLayer = item.Data.BuildLayer,
                 Tiles = new List<PathFindableTile>()
             };
 
@@ -96,8 +98,14 @@ namespace SNR_BuildSystem
                 {
                     var tileData = Grid.GetData(x, y);
                     record.Tiles.Add(tileData);
-                    placedItemRegistry[new Vector2Int(x, y)] = record;
-                    tileData.SetPlaceable(false);
+                    var cellIndex = new Vector2Int(x, y);
+                    if (!placedItemRegistry.TryGetValue(cellIndex, out var records))
+                    {
+                        records = new List<PlacedItemRecord>();
+                        placedItemRegistry[cellIndex] = records;
+                    }
+                    records.Add(record);
+                    tileData.SetBuildLayerPlaceable(item.Data.BuildLayer, false);
                     tileData.SetWalkable(item.Data.Walkable);
                     tileData.SetPenalty(Board.GetPenalty(item.Data.Category));
                 }
@@ -132,16 +140,35 @@ namespace SNR_BuildSystem
             if (!Board)
                 return;
 
-            if (!placedItemRegistry.TryGetValue(cellIndex, out var record))
+            if (!placedItemRegistry.TryGetValue(cellIndex, out var records))
                 return;
-
+            
+            var record = records.LastOrDefault();
             if (record == null)
                 return;
 
             foreach (var tile in record.Tiles.Where(tile => tile != null))
             {
-                tile.ResetBuildState();
-                placedItemRegistry.Remove(new Vector2Int(tile.XIndex, tile.YIndex));
+                var tileIndex = new Vector2Int(tile.XIndex, tile.YIndex);
+                if (!placedItemRegistry.TryGetValue(tileIndex, out var tileRecords))
+                    continue;
+
+                tileRecords.Remove(record);
+                if (tileRecords.Count <= 0)
+                {
+                    tile.ResetBuildState();
+                    placedItemRegistry.Remove(tileIndex);
+                    continue;
+                }
+
+                tile.SetBuildLayerPlaceable(record.BuildLayer, true);
+                var topRecord = tileRecords.Last();
+                var topItem = tiledItemList.GetItemById(topRecord.Data.ItemID);
+                if (!topItem)
+                    continue;
+
+                tile.SetWalkable(topItem.Data.Walkable);
+                tile.SetPenalty(Board.GetPenalty(topItem.Data.Category));
             }
 
             if (record.Instance)
@@ -196,7 +223,7 @@ namespace SNR_BuildSystem
         }
 
 
-        private bool CheckTilesPlaceable(int startX, int startY, int width, int height)
+        private bool CheckTilesPlaceable(BuildLayer buildLayer, int startX, int startY, int width, int height)
         {
             for (var y = startY; y < startY + height; y++)
             {
@@ -205,7 +232,7 @@ namespace SNR_BuildSystem
                     if (!Grid.CheckCellExist(x, y))
                         return false;
 
-                    if (!Grid.GetData(x, y).Placeable)
+                    if (!Grid.GetData(x, y).IsBuildLayerPlaceable(buildLayer))
                         return false;
                 }
             }
@@ -220,7 +247,7 @@ namespace SNR_BuildSystem
                 return false;
             
             var itemCellSize = WorldSizeToCellSize(item.Width, item.Height);
-            return CheckTilesPlaceable(startX, startY, itemCellSize.x, itemCellSize.y);
+            return CheckTilesPlaceable(item.Data.BuildLayer, startX, startY, itemCellSize.x, itemCellSize.y);
         }
     }
 }

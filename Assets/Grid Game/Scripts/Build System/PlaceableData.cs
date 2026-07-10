@@ -10,6 +10,7 @@ namespace SNR_BuildSystem
         public Vector2 WorldSize;
         public bool Walkable;
         public TileCategory Category;
+        public BuildLayer BuildLayer;
         public GameObject PreviewObj;
     }
 }
