@@ -33,7 +33,7 @@ public class CameraControl : MonoBehaviour
         prop.TargetPos += prop.MoveDir * (attr.moveSpeed * Time.deltaTime);
         prop.IsMove = Input.Move != Vector2.zero;
 
-        prop.RotateAngle = Input.Rotate * attr.rotateSpeed;
+        prop.RotateAngle = -Input.Rotate * attr.rotateSpeed;
         prop.IsRotate = Input.Rotate != 0f;
         
         prop.TargetFov -= Input.Zoom * attr.zoomSpeed;

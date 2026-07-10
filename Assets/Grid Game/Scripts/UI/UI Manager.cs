@@ -10,6 +10,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform btnParent;
     [SerializeField] private BuildingItemButton buildingBtnPrefab;
     
+    [Header("Remove Button")]
+    [SerializeField] private PlayerToolButton[] playerToolButtons;
+    
     public void RegisterItemButtons(TiledItemList tiledItemList)
     {
         for (var i = 0; i < tiledItemList.Items.Count; i++)
@@ -22,19 +25,21 @@ public class UIManager : MonoBehaviour
             var itemBtn = PoolManager.Instance.Spawn(buildingBtnPrefab, btnParent);
             itemBtn.SetData(tiledItemList.Items[i]);
         }
+        
+        EventManager.Register<OnChangePlayerMode>(Event_OnChangePlayerMode);
     }
 
 
     public void UnregisterItemButtons()
     {
-        
+        EventManager.Unregister<OnChangePlayerMode>(Event_OnChangePlayerMode);
     }
 
-    private void OnButtonClick(int id)
+    private void Event_OnChangePlayerMode(OnChangePlayerMode args)
     {
-        EventManager.RaiseEvent(new OnSelectPlaceableItem
+        foreach (var item in playerToolButtons)
         {
-            Id = id
-        });
+            item.EnableButton(args.Mode != item.Mode);
+        }
     }
 }

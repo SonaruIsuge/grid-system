@@ -1,15 +1,15 @@
-﻿using System;
+﻿
+using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using SNR_Event;
 using SNR_PathFinding;
 using UnityEngine;
+using UtilSNR.Common;
 
 
 public class TestNPC : MonoBehaviour
 {
-    [SerializeField] private KeyCode findPathKey;
-    [SerializeField] private Transform target;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float turnSpeed; 
     [SerializeField] private float turnDistance;
@@ -19,7 +19,8 @@ public class TestNPC : MonoBehaviour
     private GameBoard gameBoard;
     
     // Path Finding
-    [SerializeField] private int currentPoint;
+    private Vector3 target;
+    private int currentPoint;
     private Path path;
     
     private bool pathFindRequested;
@@ -27,15 +28,12 @@ public class TestNPC : MonoBehaviour
 
     private CancellationTokenSource cts;
 
-    public event Action<TestNPC, Vector3[], Path, bool> OnPathCallback;
-
     private void Awake()
     {
         gameBoard = GameManager.Instance.GameBoard;
     }
 
-
-    private void Start()
+    private void OnEnable()
     {
         cts = new CancellationTokenSource();
         
@@ -45,35 +43,38 @@ public class TestNPC : MonoBehaviour
         currentPoint = 0;
     }
 
+    private void OnDisable()
+    {
+        cts.CancelAndDispose();
+    }
 
     private void Update()
     {
-        pathFindRequested = Input.GetKeyDown(findPathKey);
-        
         // If target move, update new path
-        if(moveProcessing) 
-            UpdatePath();
+        // if(moveProcessing) 
+        //     UpdatePath();
         
         // If path exists, stop the process
         if (pathFindRequested)
         {
             if (moveProcessing)
-                cts.Cancel();
+                cts = cts.Refresh();
             
-            PathRequestManager.Instance.RequestPath(new PathRequest(gameBoard.Grid, transform.position, target.position, PathFindCallback));
+            PathRequestManager.Instance.RequestPath(new PathRequest(gameBoard.Grid, transform.position, target, PathFindCallback));
+            pathFindRequested = false;
         }
 
         // If path exists, start move along the path
-        if (path != null && !moveProcessing)
-        {
-            if (cts.IsCancellationRequested)
-            {
-                cts.Dispose();
-                cts = new CancellationTokenSource();
-            }
-            
-            Move(cts.Token).Forget();
-        }
+        // if (path != null && !moveProcessing)
+        // {   
+        //     Move(cts.Token).Forget();
+        // }
+    }
+
+    public void RequestMoveToTarget(Vector3 newTarget)
+    {
+        target = newTarget;
+        pathFindRequested = true;
     }
 
 
@@ -82,11 +83,22 @@ public class TestNPC : MonoBehaviour
         currentPoint = 0;
         path = pathFind ? new Path(wayPoints, transform.position, turnDistance, stoppingDistance) : null;
         
-        OnPathCallback?.Invoke(this, wayPoints, path, pathFind);
+        if (path != null && !moveProcessing)
+        {   
+            Move(cts.Token).Forget(); 
+        }
+        
+        EventManager.RaiseEvent(new OnNpcFindPath
+        {
+            HasPath = pathFind,
+            Npc = this,
+            WayPoints =  wayPoints,
+            Path = path
+        });
     }
 
 
-    private async UniTask Move(CancellationToken ctn)
+    private async UniTaskVoid Move(CancellationToken ctn)
     {
         currentPoint = 0;
         moveProcessing = true;
@@ -121,10 +133,15 @@ public class TestNPC : MonoBehaviour
                     break;
             }
 
-            await Task.Yield();
+            await UniTask.Yield();
         }
 
         ClearPath();
+        
+        EventManager.RaiseEvent(new OnNpcReachTarget
+        {
+            Npc = this
+        });
     }
 
 
@@ -140,7 +157,7 @@ public class TestNPC : MonoBehaviour
             return;
 
         var sqrPathThreshold = updatePathThreshold * updatePathThreshold;
-        if ((target.position - path.lookPoints[^1]).sqrMagnitude > sqrPathThreshold)
+        if ((target - path.lookPoints[^1]).sqrMagnitude < sqrPathThreshold)
         {
             pathFindRequested = true;
         }

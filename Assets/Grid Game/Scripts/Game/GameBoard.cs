@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SNR_PathFinding;
+using SonaruUtilities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -42,6 +43,7 @@ public class GameBoard : MonoBehaviour
     {
         AutoSetObstacle();
         if(blurPenalty) BlurPenaltyMap();
+        TilesSetOriginState();
     }
 
 
@@ -57,10 +59,10 @@ public class GameBoard : MonoBehaviour
 
     public int GetPenalty(TileCategory category)
     {
-        if (penaltyDict == null || !penaltyDict.ContainsKey(category))
+        if (penaltyDict == null || !penaltyDict.TryGetValue(category, out var penalty))
             return 0;
         
-        return penaltyDict[category];
+        return penalty;
     }
 
 
@@ -103,7 +105,11 @@ public class GameBoard : MonoBehaviour
                             penalty = penaltyDict[marker.TileCategory];
                     }
                 }
-                
+
+                // No matching category was found: fall back to the default (0)
+                if (penalty == int.MaxValue)
+                    penalty = 0;
+
                 tile.SetPenalty(penalty);
                 
                 
@@ -131,7 +137,7 @@ public class GameBoard : MonoBehaviour
 
             for (var x = 1; x < columnNumber; x++)
             {
-                var removeIndex = Mathf.Clamp(x - kernelExtents - 1, 0, columnNumber);
+                var removeIndex = Mathf.Clamp(x - kernelExtents - 1, 0, columnNumber - 1);
                 var addIndex = Mathf.Clamp(x + kernelExtents, 0, columnNumber - 1);
                 
                 penaltyHorizontalPass[x, y] = penaltyHorizontalPass[x - 1, y] -
@@ -152,7 +158,7 @@ public class GameBoard : MonoBehaviour
 
             for (var y = 1; y < rowNumber; y++)
             {
-                var removeIndex = Mathf.Clamp(y - kernelExtents - 1, 0, rowNumber);
+                var removeIndex = Mathf.Clamp(y - kernelExtents - 1, 0, rowNumber - 1);
                 var addIndex = Mathf.Clamp(y + kernelExtents, 0, rowNumber - 1);
 
                 penaltyVerticalPass[x, y] = penaltyVerticalPass[x, y - 1] - 
@@ -163,6 +169,17 @@ public class GameBoard : MonoBehaviour
 
                 maxPenalty = Mathf.Max(blurPenalty, maxPenalty);
                 minPenalty = Mathf.Min(blurPenalty, minPenalty);
+            }
+        }
+    }
+
+    private void TilesSetOriginState()
+    {
+        for (var x = 0; x < grid.ColumnNumber; x++)
+        {
+            for (var y = 0; y < grid.RowNumber; y++)
+            {
+                grid.GetData(x, y).SetOriginState();
             }
         }
     }

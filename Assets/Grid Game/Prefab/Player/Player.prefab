@@ -47,9 +47,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41172564167debc409d31e202516a9b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}
-  playerPosObj: {fileID: 2234367266591637455}
-  playerTileObj: {fileID: 1520977119733856359}
+  playerVisual:
+    playerPointObj: {fileID: 2234367266591637455}
+    playerTileObj: {fileID: 1520977119733856359}
+  preview:
+    opacity: 0.5
+  npcSpawner:
+    npcPrefab: {fileID: 8104441337063264667, guid: 01ada5a6192d200499d5cc567426a59a,
+      type: 3}
 --- !u!114 &4403094851362657334
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -16,6 +16,9 @@ namespace SNR_PathFinding
         public int HeapIndex { get; set; }
         public int PathPenalty { get; private set; }
         public bool Placeable { get; private set; }
+
+        private bool baseWalkable;
+        private int basePathPenalty;
         
         public int GCost;
         public int HCost;
@@ -31,6 +34,9 @@ namespace SNR_PathFinding
             Walkable = true;
             PathPenalty = 0;
             Placeable = true;
+            
+            baseWalkable = Walkable;
+            basePathPenalty = PathPenalty;
             
             GCost = 0;
             HCost = 0;
@@ -62,6 +68,21 @@ namespace SNR_PathFinding
         public void SetPlaceable(bool placeable)
         {
             Placeable = placeable;
+        }
+
+
+        public void SetOriginState()
+        {
+            baseWalkable = Walkable;
+            basePathPenalty = PathPenalty;
+        }
+
+
+        public void ResetBuildState()
+        {
+            SetPlaceable(true);
+            SetWalkable(baseWalkable);
+            SetPenalty(basePathPenalty);
         }
         
 

@@ -69,7 +69,7 @@ namespace SNR_Event
 
             if (actionDictionary.TryGetValue(eventType, out var existDelegate))
             {
-                Delegate.Combine(existDelegate, callback);
+                actionDictionary[eventType] = Delegate.Combine(existDelegate, callback);
             }
             else
             {

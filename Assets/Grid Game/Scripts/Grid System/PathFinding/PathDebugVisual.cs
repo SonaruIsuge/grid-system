@@ -12,7 +12,6 @@ namespace SNR_PathFinding
     {
         // Reference
         [SerializeField] private GameBoard gameBoard;
-        [SerializeField] private TestNPC[] observeNPCs;
         
         // Debug Visual Control
         [SerializeField] private bool drawTile;
@@ -42,34 +41,20 @@ namespace SNR_PathFinding
 
             npcWayPointsDict = new Dictionary<TestNPC, Vector3[]>();
             npcPathDict = new Dictionary<TestNPC, Path>();
-            
-            foreach (var npc in observeNPCs)
-            {
-                npcWayPointsDict.Add(npc, null);
-                npcPathDict.Add(npc, null);
-            }
         }
 
 
         private void OnEnable()
         {
             EventManager.Register<OnTileChangeWalkable>(RecordObstacle);
-
-            foreach (var npc in observeNPCs)
-            {
-                npc.OnPathCallback += RecordNpcPath;
-            }
+            EventManager.Register<OnNpcFindPath>(Event_OnNpcFindPath);
         }
 
 
         private void OnDisable()
         {
             EventManager.Unregister<OnTileChangeWalkable>(RecordObstacle);
-            
-            foreach (var npc in observeNPCs)
-            {
-                npc.OnPathCallback -= RecordNpcPath;
-            }
+            EventManager.Unregister<OnNpcFindPath>(Event_OnNpcFindPath);
         }
 
         
@@ -124,81 +109,91 @@ namespace SNR_PathFinding
         private void DrawTiles()
         {
             Gizmos.color = Color.cyan;
-            
-#if UNITY_EDITOR
-            for (var i = 1; i < gameBoard.ColumnNumber; i++)
+
+            if (!Application.isPlaying)
             {
-                var start = leftTop + Vector3.right * gameBoard.CellSize * i;
-                var end = leftBottom + Vector3.right * gameBoard.CellSize * i;
-                Gizmos.DrawLine(start, end);
+                for (var i = 1; i < gameBoard.ColumnNumber; i++)
+                {
+                    var start = leftTop + Vector3.right * gameBoard.CellSize * i;
+                    var end = leftBottom + Vector3.right * gameBoard.CellSize * i;
+                    Gizmos.DrawLine(start, end);
+                }
+
+                for (var j = 1; j < gameBoard.RowNumber; j++)
+                {
+                    var start = leftBottom + Vector3.forward * gameBoard.CellSize * j;
+                    var end = rightBottom + Vector3.forward * gameBoard.CellSize * j;
+                    Gizmos.DrawLine(start, end);
+                }
             }
 
-            for (var j = 1; j < gameBoard.RowNumber; j++)
+            else
             {
-                var start = leftBottom + Vector3.forward * gameBoard.CellSize * j;
-                var end = rightBottom + Vector3.forward * gameBoard.CellSize * j;
-                Gizmos.DrawLine(start, end);
-            }
-#else
-            for (var i = 1; i < Grid.ColumnNumber; i++)
-            {
-                var start = leftTop + Vector3.right * Grid.CellSize * i;
-                var end = leftBottom + Vector3.right * Grid.CellSize * i;
-                Gizmos.DrawLine(start, end);
-            }
+                for (var i = 1; i < Grid.ColumnNumber; i++)
+                {
+                    var start = leftTop + Vector3.right * Grid.CellSize * i;
+                    var end = leftBottom + Vector3.right * Grid.CellSize * i;
+                    Gizmos.DrawLine(start, end);
+                }
 
-            for (var j = 1; j < Grid.RowNumber; j++)
-            {
-                var start = leftBottom + Vector3.forward * Grid.CellSize * j;
-                var end = rightBottom + Vector3.forward * Grid.CellSize * j;
-                Gizmos.DrawLine(start, end);
+                for (var j = 1; j < Grid.RowNumber; j++)
+                {
+                    var start = leftBottom + Vector3.forward * Grid.CellSize * j;
+                    var end = rightBottom + Vector3.forward * Grid.CellSize * j;
+                    Gizmos.DrawLine(start, end);
+                }
             }
-#endif
         }
 
 
         private void DrawTileCubes()
         {
-#if UNITY_EDITOR
-            for (var x = 0; x < gameBoard.ColumnNumber; x++)
+            if (!Application.isPlaying)
             {
-                for (var y = 0; y < gameBoard.RowNumber; y++)
+                for (var x = 0; x < gameBoard.ColumnNumber; x++)
                 {
-                    Gizmos.DrawCube(new Vector3(x, 0, y) * gameBoard.CellSize + gameBoard.OffsetPosition,
-                        Vector3.one * gameBoard.CellSize * 0.95f);
+                    for (var y = 0; y < gameBoard.RowNumber; y++)
+                    {
+                        Gizmos.DrawCube(new Vector3(x, 0, y) * gameBoard.CellSize + gameBoard.OffsetPosition,
+                            Vector3.one * gameBoard.CellSize * 0.95f);
+                    }
                 }
             }
-#else
-            for (var x = 0; x < Grid.ColumnNumber; x++)
+
+            else
             {
-                for (var y = 0; y < Grid.RowNumber; y++)
+                for (var x = 0; x < Grid.ColumnNumber; x++)
                 {
-                    // Gizmos.color = Color.Lerp(Color.white, Color.black,
-                        // Mathf.InverseLerp(gameBoard.minPenalty, gameBoard.maxPenalty, Grid.GetData(x, y).PathPenalty));
-                    Gizmos.color = Grid.GetData(x, y).Placeable ? Color.white : Color.black;
-                    Gizmos.DrawCube(Grid.GetWorldPosition(x, y), Vector3.one * Grid.CellSize * 0.95f);
+                    for (var y = 0; y < Grid.RowNumber; y++)
+                    {
+                        Gizmos.color = Grid.GetData(x, y).Placeable ? Color.white : Color.black;
+                        Gizmos.DrawCube(Grid.GetWorldPosition(x, y), Vector3.one * Grid.CellSize * 0.95f);
+                    }
                 }
             }
-#endif
         }
 
 
         private void DrawObstacles()
         {
-#if !UNITY_EDITOR
+            if (!Application.isPlaying)
+                return;
+            
             Gizmos.color = Color.black;
 
             foreach (var pos in obstaclesList)
             {
                 Gizmos.DrawCube(pos, Vector3.one * Grid.CellSize);
             }
-#endif
+
         }
 
 
         private void DrawPath()
         {
-#if !UNITY_EDITOR
+            if (!Application.isPlaying)
+                return;
+            
             Gizmos.color = Color.green;
             
             foreach (var path in npcWayPointsDict.Values)
@@ -214,14 +209,9 @@ namespace SNR_PathFinding
 
             foreach (var path in npcPathDict.Values)
             {
-                if(path == null)
-                    continue;
-                
-                path.DrawWithGizmos();
+                path?.DrawWithGizmos();
             }
-#endif
         }
-
 
         private void RecordObstacle(OnTileChangeWalkable e)
         {
@@ -234,22 +224,18 @@ namespace SNR_PathFinding
                 obstaclesList.Remove(position);
         }
 
-
-        private void RecordNpcPath(TestNPC npc, Vector3[] wayPoints, Path path, bool pathFind)
+        private void Event_OnNpcFindPath(OnNpcFindPath args)
         {
-            if (!observeNPCs.Contains(npc)) return;
-
-            if (pathFind)
+            if (args.HasPath)
             {
-                npcWayPointsDict[npc] = wayPoints;
-                npcPathDict[npc] = path;
+                npcWayPointsDict[args.Npc] = args.WayPoints;
+                npcPathDict[args.Npc] = args.Path;
             }
             else
             {
-                npcWayPointsDict[npc] = null;
-                npcPathDict[npc] = null;
+                npcWayPointsDict[args.Npc] = null;
+                npcPathDict[args.Npc] = null;
             }
-                
         }
     }
 }

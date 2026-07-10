@@ -25,9 +25,13 @@ public class BuildingItemButton : Button
 
     private void Event_OnButtonClick()
     {
+        if (!tileData)
+            return;
+
         EventManager.RaiseEvent(new OnSelectPlaceableItem
         {
             Id = tileData.Data.ID
         });
     }
+
 }

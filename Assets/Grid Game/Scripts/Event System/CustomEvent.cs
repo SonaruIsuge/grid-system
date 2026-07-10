@@ -1,5 +1,6 @@
 ﻿using SNR_BuildSystem;
 using SNR_PathFinding;
+using UnityEngine;
 
 namespace SNR_Event
 {
@@ -41,5 +42,39 @@ namespace SNR_Event
     public struct OnPlaceItem : CustomEvent
     {
         public PlaceItemData Data;
+    }
+
+    public struct OnRemoveItem : CustomEvent
+    {
+        public PlaceItemData Data;
+    }
+
+    public struct OnChangePlayerMode : CustomEvent
+    {
+        public TestPlayer.PlayerMode Mode;
+    }
+
+    public struct OnNpcFindPath : CustomEvent
+    {
+        public bool HasPath;
+        public TestNPC Npc;
+        public Vector3[] WayPoints;
+        public Path Path;
+    }
+
+    public struct OnSpawnNpc : CustomEvent
+    {
+        public TestNPC Npc;
+    }
+    
+    public struct OnSetNpcTarget : CustomEvent
+    {
+        public TestNPC Npc;
+        public Vector3 TargetPos;
+    }
+
+    public struct OnNpcReachTarget : CustomEvent
+    {
+        public TestNPC Npc;
     }
 }

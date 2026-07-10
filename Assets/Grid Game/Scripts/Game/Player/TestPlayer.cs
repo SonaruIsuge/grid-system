@@ -3,15 +3,25 @@ using SNR_BuildSystem;
 using SNR_Event;
 using SNR_PathFinding;
 using SonaruUtilities;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class TestPlayer : MonoBehaviour
 {
+    public enum PlayerMode
+    {
+        Idle,
+        Placing,
+        Removing,
+        PlacingNpc
+    }
+
     [SerializeField] private PlayerVisual playerVisual = new();
     [SerializeField] private BuildPreview preview = new();
+    [SerializeField] private NpcPathFindSpawner npcSpawner = new();
     
     private PlaceItemData currentItemData;
+    private PlayerMode currentPlayerMode;
+    
     private Vector3 mouseInGridPos;
     private Vector2Int mouseInGridIndex;
     
@@ -28,19 +38,22 @@ public class TestPlayer : MonoBehaviour
             XIndex = 0,
             YIndex = 0,
             Facing = ItemFacing.Up
-        }; 
+        };
+        currentPlayerMode = PlayerMode.Idle;
     }
 
 
     private void OnEnable()
     {
         EventManager.Register<OnSelectPlaceableItem>(Event_OnSelectPlaceableItem);
+        EventManager.Register<OnChangePlayerMode>(Event_OnChangePlayerMode);
     }
 
 
     private void OnDisable()
     {
         EventManager.Unregister<OnSelectPlaceableItem>(Event_OnSelectPlaceableItem);
+        EventManager.Unregister<OnChangePlayerMode>(Event_OnChangePlayerMode);
     }
 
 
@@ -54,6 +67,22 @@ public class TestPlayer : MonoBehaviour
         
         playerVisual.UpdatePlayerGrid(mouseInGridPos, Grid.GetWorldPosition(currentItemData.XIndex, currentItemData.YIndex));
 
+        switch (currentPlayerMode)
+        {
+            case PlayerMode.Placing:
+                UpdatePlacement();
+                break;
+            case PlayerMode.Removing:
+                UpdateRemoval();
+                break;
+            case PlayerMode.PlacingNpc:
+                UpdateNpcPoints();
+                break;
+        }
+    }
+
+    private void UpdatePlacement()
+    {
         if (currentItemData.ItemID < 0)
             return;
         
@@ -72,6 +101,25 @@ public class TestPlayer : MonoBehaviour
         }
     }
 
+
+    private void UpdateRemoval()
+    {
+        if (Input.LeftMouseDown)
+        {
+            GridBuildManager.Instance.RemoveTiledItem(mouseInGridIndex);
+        }
+    }
+
+    private void UpdateNpcPoints()
+    {
+        if (!Input.LeftMouseDown) 
+            return;
+        
+        if(npcSpawner.CurrentPhase == NpcPathFindSpawner.SetPhase.SetStart)
+            npcSpawner.SpawnNpc(mouseInGridPos);
+        else
+            npcSpawner.SetTarget(mouseInGridPos);
+    }
 
     private bool TryGetMouseInGrid(out Vector3 pos, out Vector2Int index)
     {
@@ -113,6 +161,9 @@ public class TestPlayer : MonoBehaviour
     
     private void Event_OnSelectPlaceableItem(OnSelectPlaceableItem args)
     {
+        if (currentPlayerMode == PlayerMode.Removing)
+            return;
+        
         var itemData = GridBuildManager.Instance.GetTiledItemData(args.Id);
 
         if (itemData == null)
@@ -120,6 +171,15 @@ public class TestPlayer : MonoBehaviour
         
         currentItemData.ItemID = args.Id;
         currentItemData.Facing = ItemFacing.Up;
+        currentPlayerMode = PlayerMode.Placing;
         preview.SetPreview(itemData.PreviewObj);
+    }
+
+    private void Event_OnChangePlayerMode(OnChangePlayerMode args)
+    {
+        currentItemData.ItemID = -1;
+        preview.ClearPreview();
+
+        currentPlayerMode = args.Mode;
     }
 }

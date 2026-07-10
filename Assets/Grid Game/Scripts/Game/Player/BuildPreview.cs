@@ -11,9 +11,6 @@ public class BuildPreview
     private float opacity = 0.5f;
     
     private Transform currentPreviewObj = null;
-    private Transform currentPreviewObjAnchor = null;
-    private Vector3 anchorCenterOffset = Vector3.zero;
-
     private Material[] previewObjMaterials;
     
     public void SetPreview(GameObject previewItem)
@@ -21,12 +18,9 @@ public class BuildPreview
         if (previewItem == null)
             return;
 
-        RecyclePreview();
+        ClearPreview();
         
         currentPreviewObj = PoolManager.Instance.Spawn(previewItem.transform);
-        currentPreviewObjAnchor = GetAnchor(currentPreviewObj);
-        anchorCenterOffset =  currentPreviewObj.position - currentPreviewObjAnchor.position;
-        
         previewObjMaterials = currentPreviewObj.GetComponent<MeshRenderer>().materials;
 
         foreach (var mat in previewObjMaterials)
@@ -52,7 +46,7 @@ public class BuildPreview
         return transforms.Length > 1 ? transforms[1] : transforms[0];
     }
 
-    private void RecyclePreview()
+    public void ClearPreview()
     {
         if (currentPreviewObj == null)
             return;
@@ -60,8 +54,6 @@ public class BuildPreview
         PoolManager.Instance.Despawn(currentPreviewObj);
         
         currentPreviewObj = null;
-        currentPreviewObjAnchor = null;
-        anchorCenterOffset = Vector3.zero;
         previewObjMaterials =  null;
     }
 }
