@@ -64,7 +64,7 @@ Once the game starts, you can control the camera, building modes, and NPC pathfi
     *   Applies a separable image box blur filter at game initialization to smooth grid penalties around obstacles. Achieves a time complexity of $O(N)$ (linear relative to grid size), allowing NPC navigation paths to naturally steer away from sharp wall corners.
 3.  **Static Level Physics Detection (Raycast Mesh Analyzer)**
     *   Scans and detects objects marked with `TileCategoryMarker` at startup, automatically generating walkability properties and penalty costs for grid cells to save level design overhead.
-4.  **Heap-Optimized A* Pathfinding & Multi-Threaded Queue**
+4.  **Heap-Optimized A\* Pathfinding & Multi-Threaded Queue**
     *   Implements a custom generic binary min-heap `Heap<T>` using an array backbone to reduce Open Set insertion, update, and extraction complexity to $O(\log N)$.
     *   Offloads pathfinding operations asynchronously to background worker threads, preventing frame rate stutters, and simplifies paths by removing collinear redundant waypoints.
 5.  **Analytical Geometry NPC Path-Following Controller**
